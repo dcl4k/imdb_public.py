@@ -1,6 +1,27 @@
+import tarfile
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import requests
+import gzip
+
+# URL of the IMDb dataset
+url = 'https://datasets.imdbws.com/name.basics.tsv.gz'
+
+# Download the file
+response = requests.get(url, stream=True)
+filename = url.split("/")[-1]
+with open(filename, 'wb') as file:
+    for chunk in response.iter_content(chunk_size=1024):
+        if chunk:
+            file.write(chunk)
+
+# Check if the file ends with 'gz' and handle accordingly
+if filename.endswith('gz'):
+    # Open the gzipped file and create a new file to write the decompressed data
+    with gzip.open(filename, 'rb') as f_in:
+        with open('name.basics.tsv', 'wb') as f_out:
+            f_out.write(f_in.read())
 
 # Load the data, handling bad lines
 df = pd.read_csv('name.basics.tsv', sep='\t', on_bad_lines='skip')
